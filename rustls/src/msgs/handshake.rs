@@ -1680,15 +1680,16 @@ impl DerefMut for ServerHelloPayload {
 }
 
 #[derive(Clone, Default, Debug)]
-pub(crate) struct CertificateChain<'a>(pub(crate) Vec<CertificateDer<'a>>);
+pub(crate) struct CertificateChain<'a>(pub(crate) Arc<Vec<CertificateDer<'a>>>);
 
 impl CertificateChain<'_> {
     pub(crate) fn into_owned(self) -> CertificateChain<'static> {
         CertificateChain(
-            self.0
+            Arc::unwrap_or_clone(self.0)
                 .into_iter()
                 .map(|c| c.into_owned())
-                .collect(),
+                .collect::<Vec<_>>()
+                .into(),
         )
     }
 }
@@ -1699,7 +1700,7 @@ impl<'a> Codec<'a> for CertificateChain<'a> {
     }
 
     fn read(r: &mut Reader<'a>) -> Result<Self, InvalidMessage> {
-        Vec::read(r).map(Self)
+        Vec::read(r).map(|certificates| Self(Arc::new(certificates)))
     }
 }
 
@@ -1889,7 +1890,8 @@ impl<'a> CertificatePayloadTls13<'a> {
             self.entries
                 .into_iter()
                 .map(|e| e.cert)
-                .collect(),
+                .collect::<Vec<_>>()
+                .into(),
         )
     }
 }

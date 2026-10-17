@@ -355,7 +355,7 @@ mod client_hello {
         cert_chain: &[CertificateDer<'static>],
     ) {
         flight.add(HandshakeMessagePayload(HandshakePayload::Certificate(
-            CertificateChain(cert_chain.to_vec()),
+            CertificateChain(cert_chain.to_vec().into()),
         )));
     }
 

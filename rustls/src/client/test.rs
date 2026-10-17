@@ -248,9 +248,9 @@ mod tests {
         let cert = Message {
             version: ProtocolVersion::TLSv1_2,
             payload: MessagePayload::handshake(HandshakeMessagePayload(
-                HandshakePayload::Certificate(CertificateChain(vec![CertificateDer::from(
-                    &b"does not matter"[..],
-                )])),
+                HandshakePayload::Certificate(CertificateChain(
+                    vec![CertificateDer::from(&b"does not matter"[..])].into(),
+                )),
             )),
         };
         conn.read_tls(&mut cert.into_wire_bytes().as_slice())

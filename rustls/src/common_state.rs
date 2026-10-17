@@ -21,6 +21,7 @@ use crate::msgs::message::{
 };
 use crate::record_layer::PreEncryptAction;
 use crate::suites::{PartiallyExtractedSecrets, SupportedCipherSuite};
+use crate::sync::Arc;
 #[cfg(feature = "tls12")]
 use crate::tls12::ConnectionSecrets;
 use crate::unbuffered::{EncryptError, InsufficientSizeError};
@@ -138,6 +139,16 @@ impl CommonState {
     /// This choice simplifies the API and ensures backwards compatibility.
     pub fn peer_certificates(&self) -> Option<&[CertificateDer<'static>]> {
         self.peer_certificates.as_deref()
+    }
+
+    /// Shares the authenticated peer certificate chain without copying its DER bytes.
+    ///
+    /// Availability and ordering are identical to [`Self::peer_certificates`].
+    /// The returned chain remains valid after the connection is dropped.
+    pub fn peer_certificates_shared(&self) -> Option<Arc<Vec<CertificateDer<'static>>>> {
+        self.peer_certificates
+            .as_ref()
+            .map(|chain| Arc::clone(&chain.0))
     }
 
     /// Retrieves the protocol agreed with the peer via ALPN.

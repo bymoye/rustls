@@ -855,9 +855,9 @@ fn all_tls12_handshake_payloads() -> Vec<HandshakeMessagePayload<'static>> {
         HandshakeMessagePayload(HandshakePayload::HelloRetryRequest(
             sample_hello_retry_request(),
         )),
-        HandshakeMessagePayload(HandshakePayload::Certificate(CertificateChain(vec![
-            CertificateDer::from(vec![1, 2, 3]),
-        ]))),
+        HandshakeMessagePayload(HandshakePayload::Certificate(CertificateChain(
+            vec![CertificateDer::from(vec![1, 2, 3])].into(),
+        ))),
         HandshakeMessagePayload(HandshakePayload::ServerKeyExchange(
             sample_ecdhe_server_key_exchange_payload(),
         )),

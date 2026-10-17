@@ -9421,3 +9421,32 @@ fn ml_dsa() {
     let mut server = ServerConnection::new(Arc::new(server_config)).unwrap();
     do_handshake(&mut client, &mut server);
 }
+
+#[test]
+fn shared_peer_certificates_retain_the_authenticated_der_after_connection_drop() {
+    let (mut client, mut server) = make_pair(KeyType::Rsa2048, &provider::default_provider());
+    assert!(
+        client
+            .peer_certificates_shared()
+            .is_none()
+    );
+    do_handshake(&mut client, &mut server);
+    let shared = client
+        .peer_certificates_shared()
+        .unwrap();
+    let again = client
+        .peer_certificates_shared()
+        .unwrap();
+    assert!(Arc::ptr_eq(&shared, &again));
+    for (borrowed, owned) in client
+        .peer_certificates()
+        .unwrap()
+        .iter()
+        .zip(shared.iter())
+    {
+        assert_eq!(borrowed.as_ptr(), owned.as_ptr());
+    }
+    drop(client);
+    assert!(!shared[0].is_empty());
+    assert_eq!(shared.as_ref(), again.as_ref());
+}
