@@ -737,16 +737,21 @@ fn client_can_get_server_cert_after_resumption() {
             do_handshake(&mut client, &mut server);
             assert_eq!(client.handshake_kind(), Some(HandshakeKind::Full));
 
-            let original_certs = client.peer_certificates();
+            let original_certs = client
+                .peer_certificates_shared()
+                .unwrap();
 
             let (mut client, mut server) =
                 make_pair_for_configs(client_config.clone(), server_config.clone());
             do_handshake(&mut client, &mut server);
             assert_eq!(client.handshake_kind(), Some(HandshakeKind::Resumed));
 
-            let resumed_certs = client.peer_certificates();
+            let resumed_certs = client
+                .peer_certificates_shared()
+                .unwrap();
 
             assert_eq!(original_certs, resumed_certs);
+            assert!(Arc::ptr_eq(&original_certs, &resumed_certs));
         }
     }
 }
